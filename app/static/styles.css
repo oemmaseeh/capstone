@@ -1,0 +1,83 @@
+/* static/styles.css */
+
+
+
+    /* Add this style block within the head of your HTML document or in a separate CSS file */
+
+    /* Keyframes for the wave effect */
+    @keyframes wave-animation {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* Apply the wave animation to the navbar */
+    .navbar-nav {
+        animation: wave-animation 3s ease-in-out infinite;
+    }
+
+body {
+    font-family: 'Arial', sans-serif;
+    transition: background-color 0.5s ease;
+    margin: 0;
+    background-color:pink
+
+}
+
+  
+
+header {
+    background-color: #333;
+    color: #fff;
+    padding: 10px;
+    text-align: center;
+}
+
+.container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.form-container {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+input, button {
+    margin-bottom: 10px;
+    padding: 10px;
+}
+
+button {
+    background-color: #333;
+    color: #fff;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #555;
+}
+
+.product {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.footer {
+    text-align: center;
+    padding: 10px;
+    background-color: #333;
+    color: #fff;
+}

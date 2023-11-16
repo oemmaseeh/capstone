@@ -1,0 +1,40 @@
+<!-- index.html -->
+
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+  <div class="jumbotron mt-5">
+    <h1 class="display-4">Welcome to Your App</h1>
+    <p class="lead">Buy and sell products with ease!</p>
+    <hr class="my-4">
+    <p>Explore a variety of products from different sellers.</p>
+    {% if 'user_id' not in session %}
+      <p class="lead">
+        <a class="btn btn-primary btn-lg" href="{{ url_for('register') }}" role="button">Get Started</a>
+      </p>
+    {% else %}
+      <p class="lead">
+        <a class="btn btn-primary btn-lg" href="{{ url_for('sell') }}" role="button">Sell a Product</a>
+      </p>
+    {% endif %}
+  </div>
+
+  <!-- Display products (you can customize this part based on your needs) -->
+  <h2 class="mb-4">Featured Products</h2>
+  <div class="row">
+    {% for product in products %}
+      <div class="col-md-4 mb-4">
+        <div class="card">
+          <img src="{{ url_for('static', filename='placeholder-image.jpg') }}" class="card-img-top" alt="Product Image">
+          <div class="card-body">
+            <h5 class="card-title">{{ product.name }}</h5>
+            <p class="card-text">Price: ${{ product.price }}</p>
+            <a href="{{ url_for('buy', product_id=product.id) }}" class="btn btn-primary">Buy Now</a>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endblock %}
