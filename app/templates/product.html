@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}
+	{{ product.name }} - artsy Shopsy
+{% endblock %}
+
+{% block content %}
+	{% with msgs =  get_flashed_messages(with_categories=True) %}
+	{% for c, msg in msgs %}
+		{% if c == 'error' %}
+			<div class="flash-error">
+		{% else %}
+			<div class="success">
+		{% endif %}
+			{{ msg | safe}}</div><br>
+	{% endfor %}
+	{% endwith %}
+
+			<div class="item-display">
+				<div class="img-wrapper">
+					<img src="{{ product.image }}" class="pic">
+				</div>
+				<b>{{ product.name }}</b>
+				<span class="right-item">${{ product.price }}</span><br>
+                <i class="fa fa-star checked"></i>
+                <i class="fa fa-star checked"></i>
+                <i class="fa fa-star checked"></i>
+                <i class="fa fa-star checked"></i>
+                <i class="fa fa-star checked"></i>
+                <span class="text-muted" >({{ range(1, 51) | random }})</span>
+                <div class="details">{{ product.details | safe }}</div>
+
+                <form action="{{ url_for('add_to_cart', product_id=product.id) }}" method="GET">
+                    <button type="submit">Buy</button>
+                </form>
+				</a>
+			</div>
+
+{% endblock %}

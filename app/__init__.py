@@ -1,17 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 from flask_sqlalchemy import SQLAlchemy
 from app.forms import ProductForm, RegistrationForm
 from flask_wtf.csrf import CSRFProtect
 from flask_migrate import Migrate
 import psycopg2
 
-conn = psycopg2.connect(
-    dbname='capstone project',
-    user='elhlgvnb',
-    password='p39xLdV11dJAD22YvORSKFYoL8VjPQN3',
-    host='bubble.db',
-    port='p39'
-)
 
 products = []
 
@@ -37,6 +30,21 @@ class Product(db.Model):
     seller_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     seller = db.relationship('User', backref=db.backref('products', lazy=True))
 
+class Post(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    content = db.Column(db.Text)
+    author = db.Column(db.String(100))
+
+
+    def __repr__(self):
+        return f"<Post {self.id} by {self.author}>"
+    
+class CartItem(db.Model):
+    __tablename__ = 'cart_items'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
 
 @app.route('/')
 def homepage():
@@ -97,34 +105,85 @@ def sell():
 
 @app.route('/logout')
 def logout():
-    # Remove the user_id from the session if it's there
     session.pop('user_id', None)
-    # Redirect to the login page or any other desired page after logout
     return redirect(url_for('login'))
 
 
-@app.route('/buy/<int:product_id>')
+@app.route('/buy/<int:product>')
 def buy(product_id):
-    
     product = next((p for p in products if p['id'] == product_id), None)
     if product:
         return f"You have purchased {product['name']} for ${product['price']}."
     else:
         return "Product not found."
+    
+@app.route('/delete_post/<int:post_id>', methods=['POST'])
+def delete_post(post_id):
+    if 'user_id' in session:
+        post = Post.query.get(post_id)
+        if post and post.author == 'user_id':
+            db.session.delete(post)
+            db.session.commit()
+            flash('Post deleted successfully', 'success')
+    return redirect(url_for('dashboard'))
 
 
     
 
 @app.route('/dashboard')
 def dashboard():
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM my_table")
-    data = cursor.fetchall()
-    conn.commit()
-    cursor.close()
-    return render_template('dashboard.html', data=data)
-
+    products = Product.query.all()
+    posts = Post.query.all()
+    return render_template('dashboard.html', products=products, posts=posts)
 
 
 if __name__ == '__main__':
     app.run()
+
+@app.route('/product/<int:product_id>')
+def product_detail(product_id):
+    product = Product.query.get_or_404(product_id)
+    return render_template('product.html', product=product)
+
+@app.route('/add_to_cart/<int:product_id>')
+def add_to_cart(product_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    user_id = session['user_id']
+    cart_item = CartItem.query.filter_by(user_id=user_id, product_id=product_id).first()
+
+    if cart_item:
+
+        cart_item.quantity += 1
+    else:
+
+        cart_item = CartItem(user_id=user_id, product_id=product_id, quantity=1)
+        db.session.add(cart_item)
+
+    db.session.commit()
+    return redirect(url_for('view_cart'))
+
+@app.route('/cart')
+def view_cart():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    user_id = session['user_id']
+    cart_items = CartItem.query.filter_by(user_id=user_id).all()
+
+    return render_template('cart.html', cart_items=cart_items)
+
+@app.route('/remove_from_cart/<int:cart_item_id>')
+def remove_from_cart(cart_item_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    user_id = session['user_id']
+    cart_item = CartItem.query.filter_by(user_id=user_id, id=cart_item_id).first()
+
+    if cart_item:
+        db.session.delete(cart_item)
+        db.session.commit()
+
+    return redirect(url_for('view_cart'))
